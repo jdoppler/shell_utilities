@@ -2,8 +2,9 @@
 """Submit a job to the SLURM Workload Manager.
 
 usage: subSLURM.py [-h] [-w [WALLTIME]] [-N NAME] [-n [NNODES]] [-t [NTASKS]]
-                   [-e EXECUTABLE] [--no-mpi] [-a JOBARRAY [JOBARRAY ...]]
-                   [-d] [-p TMP] [-s] [-P PARTITION] [-q QOS]
+                   [-e EXECUTABLE] [--no-mpi] [--set-mpi-library]
+                   [-a JOBARRAY [JOBARRAY ...]] [-d] [-p TMP] [-s]
+                   [-P PARTITION] [-q QOS]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -18,6 +19,8 @@ optional arguments:
                         executable for job submission (default:
                         solve_xml_mumps)
   --no-mpi              submit single-core job (default: False)
+  --set-mpi-library     set I_MPI_PMI_LIBRARY environment variable (default:
+                        False)
   -a JOBARRAY [JOBARRAY ...], --jobarray JOBARRAY [JOBARRAY ...]
                         submit job array to queue (default: None)
   -d, --dryrun          write submit file and exit (default: False)
@@ -52,6 +55,8 @@ parser.add_argument("-e", "--executable", default="solve_xml_mumps",
                     type=str, help="executable for job submission")
 parser.add_argument("--no-mpi", action="store_true",
                     help="submit single-core job")
+parser.add_argument("--set-mpi-library", action="store_true",
+                    help="set I_MPI_PMI_LIBRARY environment variable")
 parser.add_argument("-a", "--jobarray", nargs="+", type=str,
                     help="submit job array to queue")
 parser.add_argument("-d", "--dryrun", action="store_true",
@@ -79,7 +84,6 @@ if not params.get("silent"):
             Executable file:        {executable}
             Job array directories:  {jobarray}
             Output files:           {tmp}
-            Suppress stdout:        {silent}
             Partition:              {partition}
             Quality of Service:     {qos}
 
@@ -127,22 +131,26 @@ if params.get("no_mpi"):
 else:
     MPI = "mpirun -np $SLURM_NTASKS"
 
+if params.get("set_mpi_library"):
+    MPI_LIBRARY = "export I_MPI_PMI_LIBRARY=/cm/shared/apps/slurm/current/lib/libpmi.so"
+else:
+    MPI_LIBRARY = ""
+
 EXECUTABLE = """
         unset I_MPI_PIN_PROCESSOR_LIST
-        export I_MPI_PMI_LIBRARY=/cm/shared/apps/slurm/current/lib/libpmi.so
-
+        {MPI_LIBRARY}
         time {MPI} {executable}
-""".format(MPI=MPI, **params)
+""".format(MPI=MPI, MPI_LIBRARY=MPI_LIBRARY, **params)
 
 if joblist and not params.get('tmp'):
     EXECUTABLE = """
         OUTPUT=$SLURM_SUBMIT_DIR/slurm-${{SLURM_ARRAY_JOB_ID}}_${{SLURM_ARRAY_TASK_ID}}.out
         ln -s $OUTPUT .
-        {executable}
+        {EXECUTABLE}
         unlink $(basename $OUTPUT)
         gzip $OUTPUT
         mv $OUTPUT.gz .
-    """.format(executable=EXECUTABLE)
+    """.format(EXECUTABLE=EXECUTABLE)
 
 SLURM_INPUT = SLURM_OPTIONS + JOBARRAY_SETTINGS + TMP_FILE + EXECUTABLE
 
