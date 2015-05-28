@@ -4,7 +4,7 @@
 usage: subSLURM.py [-h] [-w [WALLTIME]] [-N NAME] [-n [NNODES]] [-t [NTASKS]]
                    [-e EXECUTABLE] [--no-mpi] [--set-mpi-library]
                    [-a JOBARRAY [JOBARRAY ...]] [-d] [-p TMP] [-s]
-                   [-P PARTITION] [-q QOS]
+                   [-P PARTITION] [-Q QOS] [-A ACCOUNT] [--ITP]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -29,8 +29,12 @@ optional arguments:
   -s, --silent          suppress output to stdout (default: False)
   -P PARTITION, --partition PARTITION
                         specify the partition (default: mem_0064)
-  -q QOS, --qos QOS     specify quality of service (QOS) (default:
+  -Q QOS, --qos QOS     specify quality of service (QOS) (default:
                         normal_0064)
+  -A ACCOUNT, --account ACCOUNT
+                        specify quality of service (QOS) (default: p70072)
+  --ITP                 override the partition/qos/account settings and use
+                        the institute nodes (default: False)
 """
 
 import argparse
@@ -68,10 +72,22 @@ parser.add_argument("-s", "--silent", action="store_true",
                     help="suppress output to stdout")
 parser.add_argument("-P", "--partition", type=str, default="mem_0064",
                     help="specify the partition")
-parser.add_argument("-q", "--qos", type=str, default="normal_0064",
+parser.add_argument("-Q", "--qos", type=str, default="normal_0064",
                     help="specify quality of service (QOS)")
+parser.add_argument("-A", "--account", type=str, default="p70072",
+                    help="specify quality of service (QOS)")
+parser.add_argument("--ITP", action="store_true",
+                    help=("override the partition/qos/account settings and "
+                          "use the institute nodes"))
 
 params = vars(parser.parse_args())
+
+# override partition, qos and account if ITP is specified
+if params.get("ITP"):
+    itp_params = {'qos': 'p70623_0256',
+                  'partition': 'mem_0256',
+                  'account': 'p70623'}
+    params.update(itp_params)
 
 # print options
 if not params.get("silent"):
@@ -86,6 +102,7 @@ if not params.get("silent"):
             Output files:           {tmp}
             Partition:              {partition}
             Quality of Service:     {qos}
+            Account:                {account}
 
     """.format(**params))
 
@@ -123,6 +140,7 @@ SLURM_OPTIONS = """
         #SBATCH --ntasks-per-node={ntasks}
         #SBATCH --partition={partition}
         #SBATCH --qos={qos}
+        #SBATCH --account={account}
 """.format(**params)
 SLURM_OPTIONS = SLURM_OPTIONS[1:]
 
