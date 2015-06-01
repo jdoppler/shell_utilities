@@ -88,7 +88,7 @@ params = vars(parser.parse_args())
 
 # development queue
 if params.get("dev"):
-    dev_params = {'qos': 'dev_0128'}
+    dev_params = {'qos': 'devel_0128'}
     params.update(dev_params)
 
 # override partition, qos and account if ITP is specified
