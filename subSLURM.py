@@ -76,20 +76,14 @@ parser.add_argument("-Q", "--qos", type=str, default="normal_0064",
                     help="specify quality of service (QOS)")
 parser.add_argument("-A", "--account", type=str, default="p70072",
                     help="specify user account")
-
-special = parser.add_mutually_exclusive_group()
-special.add_argument("--ITP", "--itp", action="store_true",
-                     help=("override the partition/qos/account settings and "
+parser.add_argument("--ITP", "--itp", action="store_true",
+                    help=("override the partition/qos/account settings and "
                           "use the institute nodes"))
-special.add_argument("--dev", action="store_true",
-                     help=("use the development QOS (for runtimes < 10')"))
+parser.add_argument("--dev", action="store_true",
+                    help=("use the development QOS (for runtimes < 10')"))
 
 params = vars(parser.parse_args())
 
-# development queue
-if params.get("dev"):
-    dev_params = {'qos': 'devel_0128'}
-    params.update(dev_params)
 
 # override partition, qos and account if ITP is specified
 if params.get("ITP"):
@@ -97,6 +91,11 @@ if params.get("ITP"):
                   'partition': 'mem_0256',
                   'account': 'p70623'}
     params.update(itp_params)
+
+# development queue
+if params.get("dev"):
+    dev_params = {'qos': 'devel_0128'}
+    params.update(dev_params)
 
 # print options
 if not params.get("silent"):
