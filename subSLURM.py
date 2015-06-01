@@ -33,7 +33,7 @@ optional arguments:
                         normal_0064)
   -A ACCOUNT, --account ACCOUNT
                         specify quality of service (QOS) (default: p70072)
-  --ITP                 override the partition/qos/account settings and use
+  --ITP, --itp          override the partition/qos/account settings and use
                         the institute nodes (default: False)
 """
 
@@ -76,7 +76,7 @@ parser.add_argument("-Q", "--qos", type=str, default="normal_0064",
                     help="specify quality of service (QOS)")
 parser.add_argument("-A", "--account", type=str, default="p70072",
                     help="specify quality of service (QOS)")
-parser.add_argument("--ITP", action="store_true",
+parser.add_argument("--ITP", "--itp", action="store_true",
                     help=("override the partition/qos/account settings and "
                           "use the institute nodes"))
 
