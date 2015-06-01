@@ -82,7 +82,7 @@ special.add_argument("--ITP", "--itp", action="store_true",
                      help=("override the partition/qos/account settings and "
                           "use the institute nodes"))
 special.add_argument("--dev", action="store_true",
-                     help=("use the development QOS (for runtimes < 10')")
+                     help=("use the development QOS (for runtimes < 10')"))
 
 params = vars(parser.parse_args())
 
