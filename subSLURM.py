@@ -4,7 +4,8 @@
 usage: subSLURM.py [-h] [-w [WALLTIME]] [-N NAME] [-n [NNODES]] [-t [NTASKS]]
                    [-e EXECUTABLE] [--no-mpi] [--set-mpi-library]
                    [-a JOBARRAY [JOBARRAY ...]] [-d] [-p TMP] [-s]
-                   [-P PARTITION] [-Q QOS] [-A ACCOUNT] [--ITP]
+                   [-P PARTITION] [-Q QOS] [-A ACCOUNT] [--ITP] [--short]
+                   [--dev]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -32,9 +33,13 @@ optional arguments:
   -Q QOS, --qos QOS     specify quality of service (QOS) (default:
                         normal_0064)
   -A ACCOUNT, --account ACCOUNT
-                        specify user account (QOS) (default: p70072)
+                        specify user account (default: p70072)
   --ITP, --itp          override the partition/qos/account settings and use
                         the institute nodes (default: False)
+  --short               use the short QOS (for runtimes < 60') (default:
+                        False)
+  --dev                 use the development QOS (for runtimes < 10') (default:
+                        False)
 """
 
 import argparse
@@ -79,6 +84,8 @@ parser.add_argument("-A", "--account", type=str, default="p70072",
 parser.add_argument("--ITP", "--itp", action="store_true",
                     help=("override the partition/qos/account settings and "
                           "use the institute nodes"))
+parser.add_argument("--short", action="store_true",
+                    help=("use the short QOS (for runtimes < 60')"))
 parser.add_argument("--dev", action="store_true",
                     help=("use the development QOS (for runtimes < 10')"))
 
@@ -91,6 +98,10 @@ if params.get("ITP"):
                   'partition': 'mem_0256',
                   'account': 'p70623'}
     params.update(itp_params)
+
+    if params.get("short"):
+        dev_params = {'qos': 'p70623_short_0256'}
+        params.update(dev_params)
 
 # development queue
 if params.get("dev"):
