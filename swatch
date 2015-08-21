@@ -27,7 +27,7 @@ USER = os.getlogin()
 # column in squeue output to read status from
 STATUS_COLUMN = 4
 
-rows, columns = os.popen('stty size', 'r').read().split()
+rows, columns = subprocess.check_output(['stty', 'size']).split()
 
 # get command-line arguments
 parser = argparse.ArgumentParser()
