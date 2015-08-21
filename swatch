@@ -33,7 +33,7 @@ rows, columns = os.popen('stty size', 'r').read().split()
 parser = argparse.ArgumentParser()
 parser.add_argument('-n', type=float, default=5,
                     help='update interval (seconds)')
-parser.add_argument('-l', type=int, default=(int(rows)-8),
+parser.add_argument('-l', type=int, default=(int(rows)-10),
                     help='number of lines to print in the squeue summary')
 args = vars(parser.parse_args())
 
