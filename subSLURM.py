@@ -105,7 +105,8 @@ if params.get("ITP"):
 
 # development queue
 if params.get("dev"):
-    dev_params = {'qos': 'devel_0128'}
+    dev_params = {'qos': 'devel_0128'
+                  'partition': 'mem_0128'}
     params.update(dev_params)
 
 # print options
